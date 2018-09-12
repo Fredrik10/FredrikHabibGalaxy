@@ -32,11 +32,12 @@ namespace FredrikHabibGalaxy
             // TODO: Add your initialization logic here
            
 
-            base.Initialize();
+         
             ship_vector.X = 380;
             ship_vector.Y = 400;
-            ship_speed.X = 2.5f;
-            ship_speed.Y = 4.5f;
+            ship_speed.X = 18f;
+            ship_speed.Y = 18f;
+            base.Initialize();
         }
 
         /// <summary>
@@ -69,12 +70,47 @@ namespace FredrikHabibGalaxy
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+                this.Exit();
+                
 
             // TODO: Add your update logic here
-            ship_vector.X += ship_speed.X;
-            ship_vector.Y += ship_speed.Y;
+         
+            KeyboardState keyboardState = Keyboard.GetState();
+
+            if(ship_vector.X <= Window.ClientBounds.Width - ship_texture.Width && ship_vector.X>=0)
+            {
+                if (keyboardState.IsKeyDown(Keys.Right))
+                    ship_vector.X += ship_speed.X;
+                if (keyboardState.IsKeyDown(Keys.Left))
+                    ship_vector.X -= ship_speed.X;
+            }
+            if( ship_vector.Y <= Window.ClientBounds.Height - ship_texture.Height && ship_vector.Y >=0)
+            {
+                if (keyboardState.IsKeyDown(Keys.Down))
+                    ship_vector.Y += ship_speed.Y;
+                if (keyboardState.IsKeyDown(Keys.Up))
+                    ship_vector.Y -= ship_speed.Y;
+
+            }
+
+            if (ship_vector.X < 0)
+                ship_vector.X = 0;
+
+            if(ship_vector.X > Window.ClientBounds.Width - ship_texture.Width)
+            {
+                ship_vector.X = Window.ClientBounds.Width - ship_texture.Width;
+            }
+
+            if (ship_vector.Y < 0)
+                ship_vector.Y = 0;
+
+            if(ship_vector.Y > Window.ClientBounds.Height - ship_texture.Height)
+            {
+                ship_vector.Y = Window.ClientBounds.Height - ship_texture.Height;
+
+            }
+            
             base.Update(gameTime);
         }
 
