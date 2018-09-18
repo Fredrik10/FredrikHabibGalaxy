@@ -15,11 +15,21 @@ namespace FredrikHabibGalaxy
         Vector2 ship_vector;
         Vector2 ship_speed;
 
+   
+ 
+        
+
+
+        
+
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+          
         }
+        
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -29,14 +39,14 @@ namespace FredrikHabibGalaxy
         /// </summary>
         protected override void Initialize()
         {
+            
             // TODO: Add your initialization logic here
-           
-
-         
             ship_vector.X = 380;
             ship_vector.Y = 400;
             ship_speed.X = 18f;
             ship_speed.Y = 18f;
+
+            
             base.Initialize();
         }
 
@@ -46,10 +56,13 @@ namespace FredrikHabibGalaxy
         /// </summary>
         protected override void LoadContent()
         {
+            
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             
             ship_texture = Content.Load<Texture2D>("ship");
+      
+            
 
             // TODO: use this.Content to load your game content here
         }
