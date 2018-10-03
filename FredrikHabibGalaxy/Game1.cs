@@ -1,35 +1,35 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FredrikHabibGalaxy
 {
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
+    /// 
+
     public class Game1 : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Texture2D ship_texture;
-        Vector2 ship_vector;
-        Vector2 ship_speed;
-
-   
- 
-        
-
-
-        
-
+        Player player;
+        PrintText printText;
+        List<Enemy> enemies;
+        List<GoldCoin> goldCoins;
+        Texture2D goldCoinSprite;
+      
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-          
+
         }
-        
+
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -39,14 +39,11 @@ namespace FredrikHabibGalaxy
         /// </summary>
         protected override void Initialize()
         {
-            
-            // TODO: Add your initialization logic here
-            ship_vector.X = 380;
-            ship_vector.Y = 400;
-            ship_speed.X = 18f;
-            ship_speed.Y = 18f;
+            goldCoins = new List<GoldCoin>();
 
-            
+            // TODO: Add your initialization logic here
+            player = new Player(Content.Load<Texture2D>("ship"), 380, 400, 2.5f, 4.5f, Content.Load<Texture2D>("bullet"));
+
             base.Initialize();
         }
 
@@ -56,13 +53,35 @@ namespace FredrikHabibGalaxy
         /// </summary>
         protected override void LoadContent()
         {
-            
+
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            
-            ship_texture = Content.Load<Texture2D>("ship");
-      
-            
+
+          
+            printText = new PrintText(Content.Load<SpriteFont>("myFont"));
+           
+            goldCoinSprite = Content.Load<Texture2D>("coin");
+           
+            enemies = new List<Enemy>();
+            Random random = new Random();
+            Texture2D tmpSprite = Content.Load<Texture2D>("mine");
+            for (int i = 0; i < 5; i++)
+            {
+                int rndX = random.Next(0, Window.ClientBounds.Width - tmpSprite.Width);
+                int rndY = random.Next(0, Window.ClientBounds.Height / 2);
+                Mine temp = new Mine(tmpSprite, rndX, rndY);
+                enemies.Add(temp);
+            }
+            tmpSprite = Content.Load<Texture2D>("tripod");
+            for(int i = 0; i < 5; i++)
+            {
+                int rndX = random.Next(0, Window.ClientBounds.Width - tmpSprite.Width);
+                int rndY = random.Next(0, Window.ClientBounds.Height / 2);
+                Tripod temp = new Tripod(tmpSprite, rndX, rndY);
+                enemies.Add(temp);
+            }
+
+
 
             // TODO: use this.Content to load your game content here
         }
@@ -83,45 +102,65 @@ namespace FredrikHabibGalaxy
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
-                
 
             // TODO: Add your update logic here
-         
-            KeyboardState keyboardState = Keyboard.GetState();
+            player.Update(Window, gameTime);
 
-            if(ship_vector.X <= Window.ClientBounds.Width - ship_texture.Width && ship_vector.X>=0)
-            {
-                if (keyboardState.IsKeyDown(Keys.Right))
-                    ship_vector.X += ship_speed.X;
-                if (keyboardState.IsKeyDown(Keys.Left))
-                    ship_vector.X -= ship_speed.X;
+     
+            foreach (Enemy e in enemies.ToList())
+            { 
+                foreach(Bullet b in player.Bullets)
+                {
+                    if (e.CheckCollision(b))
+                    {
+                        e.IsAlive = false;
+                        player.Points++;
+                    }
+                }
+
+                if (e.IsAlive)
+                {
+                    if (e.CheckCollision(player))
+                        this.Exit();
+                    e.Update(Window);
+                }
+                else
+                    enemies.Remove(e);
             }
-            if( ship_vector.Y <= Window.ClientBounds.Height - ship_texture.Height && ship_vector.Y >=0)
-            {
-                if (keyboardState.IsKeyDown(Keys.Down))
-                    ship_vector.Y += ship_speed.Y;
-                if (keyboardState.IsKeyDown(Keys.Up))
-                    ship_vector.Y -= ship_speed.Y;
+          
 
+            player.Update(Window, gameTime);
+
+
+            Random random = new Random();
+            int newCoin = random.Next(1, 200);
+            if(newCoin == 1)
+            {
+                int rndX = random.Next(0, Window.ClientBounds.Width - goldCoinSprite.Width);
+                int rndY = random.Next(0, Window.ClientBounds.Height - goldCoinSprite.Height);
+
+                goldCoins.Add(new GoldCoin(goldCoinSprite, rndX, rndY, gameTime));
             }
 
-            if (ship_vector.X < 0)
-                ship_vector.X = 0;
-
-            if(ship_vector.X > Window.ClientBounds.Width - ship_texture.Width)
+            
+            foreach(GoldCoin gc in goldCoins.ToList())
             {
-                ship_vector.X = Window.ClientBounds.Width - ship_texture.Width;
-            }
+                if (gc.IsAlive)
+                {
+                    gc.Update(gameTime);
 
-            if (ship_vector.Y < 0)
-                ship_vector.Y = 0;
-
-            if(ship_vector.Y > Window.ClientBounds.Height - ship_texture.Height)
-            {
-                ship_vector.Y = Window.ClientBounds.Height - ship_texture.Height;
-
+                    if (gc.CheckCollision(player))
+                    {
+                        goldCoins.Remove(gc);
+                        player.Points++;
+                    }
+                }
+                else
+                    goldCoins.Remove(gc);
             }
             
             base.Update(gameTime);
@@ -131,16 +170,20 @@ namespace FredrikHabibGalaxy
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Draw(GameTime gameTime)
+        protected void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            spriteBatch.Draw(ship_texture, ship_vector, Color.White);
+            player.Draw(spriteBatch);
+            foreach (Enemy e in enemies.ToList())
+                e.Draw(spriteBatch);
+            printText.Print("antal fiender:" + enemies.Count, spriteBatch, 0, 20);
+            foreach (GoldCoin gc in goldCoins)
+                gc.Draw(spriteBatch);
+            printText.Print("points" + player.Points, spriteBatch, 0, 0);
             spriteBatch.End();
-
-
 
 
             base.Draw(gameTime);
