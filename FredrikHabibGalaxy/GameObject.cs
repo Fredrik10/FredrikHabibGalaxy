@@ -63,6 +63,9 @@ namespace FredrikHabibGalaxy
         }
         public bool IsAlive { get { return isAlive; }
             set { isAlive = value; }
+
+
+   
         }
 
     }
