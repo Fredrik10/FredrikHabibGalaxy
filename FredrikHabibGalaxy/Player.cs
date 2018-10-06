@@ -86,34 +86,35 @@ namespace FredrikHabibGalaxy
                     bullets.Remove(b);
             }
         }
-        public void Draw (SpriteBatch spriteBatch)
+        public override void Draw (SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, vector, Color.White);
             foreach (Bullet b in bullets)
                 b.Draw(spriteBatch);
         }
         
-        class Bullet : PhysicalObject
+    }
+
+    class Bullet : PhysicalObject
+    {
+        public Bullet(Texture2D texture, float X, float Y)
+            : base(texture, X, Y, 0, 3f)
         {
-            public Bullet(Texture2D texture, float X, float Y)
-                : base(texture, X, Y, 0, 3f)
-            {
-            }
+        }
 
-            public void Update()
-            {
-                vector.Y -= speed.Y;
-                if (vector.Y < 0)
-                    isAlive = false;
-
-            }
+        public void Update()
+        {
+            vector.Y -= speed.Y;
+            if (vector.Y < 0)
+                isAlive = false;
 
         }
+
     }
 }
 
-      
-    
-    
+
+
+
 
 
