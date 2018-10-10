@@ -12,14 +12,14 @@ namespace FredrikHabibGalaxy
     class Player : PhysicalObject
     {
         List<Bullet> bullets;
-   
+
         Texture2D bulletTexture;
 
-        
+
 
         double timeSinceLastBullet = 0;
-          
-     
+
+
 
 
         int points = 0;
@@ -30,10 +30,20 @@ namespace FredrikHabibGalaxy
         {
             bullets = new List<Bullet>();
             this.bulletTexture = bulletTexture;
-
-
         }
 
+        public void Reset(float X, float Y, float speedX, float speedY)
+        {
+            vector.X = X;
+            vector.Y = Y;
+            speed.X = speedX;
+            speed.Y = speedY;
+
+            bullets.Clear();
+            timeSinceLastBullet = 0;
+            points = 0;
+            isAlive = true;
+        }
         public void Update(GameWindow window, GameTime gameTime)
         {
             KeyboardState keyboardState = Keyboard.GetState();
@@ -85,14 +95,17 @@ namespace FredrikHabibGalaxy
                 if (!b.IsAlive)
                     bullets.Remove(b);
             }
+
+            if (keyboardState.IsKeyDown(Keys.Escape))
+                IsAlive = false;
         }
-        public override void Draw (SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, vector, Color.White);
             foreach (Bullet b in bullets)
                 b.Draw(spriteBatch);
         }
-        
+
     }
 
     class Bullet : PhysicalObject
@@ -109,9 +122,11 @@ namespace FredrikHabibGalaxy
                 isAlive = false;
 
         }
-
     }
 }
+
+    
+
 
 
 

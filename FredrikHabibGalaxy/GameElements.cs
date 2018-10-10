@@ -12,15 +12,17 @@ namespace FredrikHabibGalaxy
 {
     class GameElements
     {
-        static Texture2D menuSprite;
-        static Vector2 menuPos;
+       
         static Player player;
         static List<Enemy> enemies;
         static List<GoldCoin> goldCoins;
         static Texture2D goldCoinSprite;
         static PrintText printText;
+        static Menu menu;
+        static Background background;
 
-        public enum State { Menu, Run, Highscore, Quit, HighScore };
+
+        public enum State { Menu, Run, HighScore, Quit };
         public static State currentState;
 
         public static void Initialize()
@@ -32,11 +34,14 @@ namespace FredrikHabibGalaxy
         public static void LoadContent(ContentManager content, GameWindow window)
         {
             //kod
-            menuSprite = content.Load<Texture2D>("menu");
-            menuPos.X = window.ClientBounds.Width / 2 - menuSprite.Width / 2;
-            menuPos.Y = window.ClientBounds.Height / 2 - menuSprite.Height / 2;
+            background = new Background(content.Load<Texture2D>("background"), window);
 
-            player = new Player(content.Load<Texture2D>("ship"), 380, 400, 2.5f, 4.5f, content.Load<Texture2D>("bullet"));
+            menu = new Menu((int)State.Menu);
+            menu.AddItem(content.Load<Texture2D>("start"), (int)State.Run);
+            menu.AddItem(content.Load<Texture2D>("highscore"),(int)State.HighScore);
+            menu.AddItem(content.Load<Texture2D>("exit"),(int)State.Quit);
+
+            player = new Player(content.Load<Texture2D>("ship"), 380, 400, 4.5f, 2.5f, content.Load<Texture2D>("bullet"));
 
             enemies = new List<Enemy>();
             Random random = new Random();
@@ -58,28 +63,28 @@ namespace FredrikHabibGalaxy
                 enemies.Add(temp);
             }
             goldCoinSprite = content.Load<Texture2D>("coin");
-            printText = new PrintText(content.Load<SpriteBatch>("MyFont"));
+            printText = new PrintText(content.Load<SpriteFont>("MyFont"));
         }
-        public static State MenuUpdate()
+        public static State MenuUpdate(GameTime gameTime)
         {
-            KeyboardState keyboardState = Keyboard.GetState();
-            if (keyboardState.IsKeyDown(Keys.S))
-                return State.Run;
-            if (keyboardState.IsKeyDown(Keys.H))
-                return State.Highscore;
-            if (keyboardState.IsKeyDown(Keys.A))
-                return State.Menu;
-
+            return (State)menu.Update(gameTime);
         }
         public static void MenuDraw(SpriteBatch spriteBatch)
         {
-
-            spriteBatch.Draw(menuSprite, menuPos, Color.White);
+            background.Draw(spriteBatch);
+            menu.Draw(spriteBatch);
+         
+            
         }
         public static State RunUpdate(ContentManager content, GameWindow window, GameTime gameTime)
         {
+            background.Update(window);
             player.Update(window, gameTime);
 
+            if(enemies.Count < 0)
+            {
+               
+            }
 
             foreach (Enemy e in enemies.ToList())
             {
@@ -130,32 +135,61 @@ namespace FredrikHabibGalaxy
                     goldCoins.Remove(gc);
             }
             if (!player.IsAlive)
+            {
+                Reset(window, content);
                 return State.Menu;
+            }
+
+            if (!player.IsAlive)
+                return State.Menu;
+            return State.Run;
+            }
+
+    public static void RunDraw(SpriteBatch spriteBatch)
+        {
+            background.Draw(spriteBatch);
+            player.Draw(spriteBatch);
+            foreach (Enemy e in enemies.ToList())
+                e.Draw(spriteBatch);
+            foreach (GoldCoin gc in goldCoins)
+                gc.Draw(spriteBatch);
+            printText.Print("points" + player.Points, spriteBatch, 0, 0);
+        }
+        public static State HighScoreUpdate()
+        {
+            KeyboardState keyboardState = Keyboard.GetState();
+            if (keyboardState.IsKeyDown(Keys.Escape))
+                return State.Menu;
+            return State.HighScore;
+        }
+
+        public static void HighScoreDraw(SpriteBatch spriteBatch)
+        {
+        }
+        
+       private static void Reset (GameWindow window, ContentManager content)
+        {
+            player.Reset(380, 400, 4.5f, 2.5f);
+
+            enemies.Clear();
+            Random random = new Random();
+            Texture2D tmpSprite = content.Load<Texture2D>("mine");
+            for(int i = 0; i < 5; i++)
+            {
+                int rndX = random.Next(0, window.ClientBounds.Width - tmpSprite.Width);
+                int rndY = random.Next(0, window.ClientBounds.Height / 2);
+                Mine temp = new Mine(tmpSprite, rndX, rndY);
+                enemies.Add(temp);
+            }
+            tmpSprite = content.Load<Texture2D>("tripod");
+            for(int i =0; i < 5; i++)
+            {
+                int rndX = random.Next(0, window.ClientBounds.Width - tmpSprite.Width);
+                int rndY = random.Next(0, window.ClientBounds.Height / 2);
+                Tripod temp = new Tripod(tmpSprite, rndX, rndY);
+                enemies.Add(temp);
+            }
+
         }
     }
-    public static void RunDraw(SpriteBatch spriteBatch)
-    {
-        player.Draw(spriteBatch);
-        foreach (Enemy e in enemies.ToList())
-            e.Draw(spriteBatch);
-        foreach (GoldCoin gc in goldCoins)
-            gc.Draw(spriteBatch);
-        printText.Print("points" + player.Points, spriteBatch, 0, 0);
-    }
-    public static State HighScoreUpdate()
-    {
-        KeyboardState keyboardState = Keyboard.GetState();
-        if (keyboardState.IsKeyDown(Keys.Escape)) ;
-        return State.Menu;
-
-        return State.Higscore;
-    }
-
-    public static void HighScoreDraw()
-    {
-    }
-
-
-
 }
-

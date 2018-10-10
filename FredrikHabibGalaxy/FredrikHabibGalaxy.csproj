@@ -41,7 +41,11 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BackgroundSprite.cs" />
     <Compile Include="GameElements.cs" />
+    <Compile Include="HighScore.cs" />
+    <Compile Include="Menu.cs" />
+    <Compile Include="MenuItem.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="Game1.cs" />

@@ -11,7 +11,7 @@ namespace FredrikHabibGalaxy
     class GameObject
     {
         protected Texture2D texture;
-        protected Vector2 vector;
+        protected Vector2 vector; 
 
 
         public GameObject(Texture2D texture, float X, float Y)
